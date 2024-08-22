@@ -184,8 +184,9 @@ function handleLocationError(browserHasGeolocation, pos) {
         : 'Error: Your browser doesn\'t support geolocation.');
 }
 
-function updateCoordinates(id, coordinates, location_id) {
-    
+function updateCoordinates(id, coordinates, location_id, polygonName) {
+	const urlParams = new URLSearchParams(window.location.search);
+    	const lang = urlParams.get('lang');
 	if(Object.keys(coordinates).length > 0){
 		var data = {
 			gps: `${coordinates.lat},${coordinates.lng}`,
@@ -218,8 +219,44 @@ function updateCoordinates(id, coordinates, location_id) {
 	};
 
 	request.send(JSON.stringify(data)); 
-	
 	alert('Thank you, location updated');
+	var leadId = id;
+		if (polygonName === 'haritna') {
+                    if(lang == 'ar'){
+			    window.location.href = `https://www.blink.jo/haritnalead?id=${leadId}&lang=${lang}`;
+		    }else {
+			    window.location.href = `https://www.blink.jo/haritnalead?id=${leadId}`;
+		    }
+						
+					
+                } else if (polygonName === 'airfiber') {
+                    if(lang == 'ar'){
+						window.location.href = `https://www.blink.jo/airfiberlead?id=${leadId}&lang=${lang}`;
+					}else {
+			    			window.location.href = `https://www.blink.jo/airfiberlead?id=${leadId}`;
+					}
+                } else if (polygonName === 'Fiber') {
+                   	if(lang == 'ar'){
+						window.location.href = `https://www.blink.jo/fiberlead?id=${leadId}&lang=${lang}`;
+					}else {
+						window.location.href = `https://www.blink.jo/fiberlead?id=${leadId}`;
+					}
+                } else if (polygonName === 'sk') {
+                 	if(lang == 'ar'){
+						window.location.href = `https://www.blink.jo/sklead?id=${leadId}&lang=${lang}`;
+					}else {
+						window.location.href = `https://www.blink.jo/sklead?id=${leadId}`;
+					}
+					
+                } else{
+			if(lang == 'ar'){		
+						window.location.href = `https://www.blink.jo/notcovered?id=${leadId}&lang=${lang}`;
+					}else {
+						window.location.href = `https://www.blink.jo/notcovered?id=${leadId}`;
+					}
+		}
+	
+	
 
 	
 	}else{
@@ -254,29 +291,29 @@ function checkMarkerInPolygons(coordinates) {
                
                 if (polygonName === 'haritna') {
 					locationId = 22;
-			updateCoordinates(id, coordinates, locationId);
+			updateCoordinates(id, coordinates, locationId, polygonName);
 					
 					
                     
                 } 
 				else if (polygonName === 'airfiber') {
 					locationId = 23;
-					updateCoordinates(id, coordinates, locationId);
+					updateCoordinates(id, coordinates, locationId, polygonName);
 				
 				}else if (polygonName === 'sk') {
 					locationId = 24;
-					updateCoordinates(id, coordinates, locationId);	
+					updateCoordinates(id, coordinates, locationId, polygonName);	
                     
                 }else if (polygonName === 'Fiber') {
 					locationId = 1;
-					updateCoordinates(id, coordinates, locationId);
+					updateCoordinates(id, coordinates, locationId, polygonName);
 					
                     
                 }
 				
 				
             } else {
-		    	updateCoordinates(id, coordinates, 20);
+		    	updateCoordinates(id, coordinates, 20, "Not Covered");
 				
 				
                 
