@@ -79,6 +79,9 @@ function initMap() {
     locationButton.classList.add("custom-map-control-button");
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(locationButton);
 
+	const nextbtn = document.getElementById("submit-button")
+	map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(nextbtn);
+
 	$.ajax('https://lead.blink.jo/app.kml').done(function (xml) {
             const geojson = toGeoJSON.kml(xml);
 			console.log(geojson)
