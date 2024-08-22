@@ -73,6 +73,18 @@ function initMap() {
     locationButton.classList.add("custom-map-control-button");
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(locationButton);
 
+	$.ajax('https://lead.blink.jo/app.kml').done(function (xml) {
+            const geojson = toGeoJSON.kml(xml);
+			console.log(geojson)
+			map.data.addGeoJson(geojson);
+            map.data.setStyle({
+			  fillColor: 0,
+			  fillOpacity: 0,
+			  strokeWeight: 0
+			});
+            
+	});
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
             const pos = {
@@ -109,6 +121,10 @@ function initMap() {
         placeMarker(event.latLng);
     });
 
+	map.data.addListener('click', function(event) {
+	  placeMarker(event.latLng)
+	});
+
     locationButton.addEventListener('click', () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
@@ -128,7 +144,8 @@ function initMap() {
     document.getElementById('submit-button').addEventListener('click', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('id');
-        updateCoordinates(id, userCoordinates);
+        //updateCoordinates(id, userCoordinates);
+	    checkMarkerInPolygons(userCoordinates);
     });
 }
 
@@ -161,11 +178,12 @@ function handleLocationError(browserHasGeolocation, pos) {
         : 'Error: Your browser doesn\'t support geolocation.');
 }
 
-function updateCoordinates(id, coordinates) {
+function updateCoordinates(id, coordinates, location_id) {
     
 	if(Object.keys(coordinates).length > 0){
 		var data = {
 			gps: `${coordinates.lat},${coordinates.lng}`,
+			'location_id': location_id
 			//city: "Dubai"
 			
 			
@@ -204,6 +222,60 @@ function updateCoordinates(id, coordinates) {
 	}
     
 }
+
+function checkMarkerInPolygons(coordinates) {
+            const latLng = new google.maps.LatLng(coordinates.lat, coordinates.lng);
+            let insidePolygon = false;
+            let polygonName = '';
+			
+			const urlParams = new URLSearchParams(window.location.search);
+			const id = urlParams.get('id');
+			
+
+            map.data.forEach(function (feature) {
+                const geometry = feature.getGeometry();
+                if (geometry.getType() === 'Polygon') {
+                    const paths = geometry.getArray()[0].getArray();
+                    const polygon = new google.maps.Polygon({ paths: paths });
+                    if (google.maps.geometry.poly.containsLocation(latLng, polygon)) {
+                        insidePolygon = true;
+                        polygonName = feature.getProperty('name');
+                    }
+                }
+            });
+			var locationId;
+            if (insidePolygon) {
+               
+                if (polygonName === 'haritna') {
+					locationId = 22;
+			updateCoordinates(id, coordinates, locationId);
+					
+					
+                    
+                } 
+				else if (polygonName === 'airfiber') {
+					locationId = 23;
+					updateCoordinates(id, coordinates, locationId);
+				
+				}else if (polygonName === 'sk') {
+					locationId = 24;
+					updateCoordinates(id, coordinates, locationId);	
+                    
+                }else if (polygonName === 'Fiber') {
+					locationId = 1;
+					updateCoordinates(id, coordinates, locationId);
+					
+                    
+                }
+				
+				
+            } else {
+		    	updateCoordinates(id, coordinates, 20);
+				
+				
+                
+            }
+        }
 
 // Initialize the map
 initMap();
