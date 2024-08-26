@@ -64,7 +64,7 @@
 let marker;
 let userCoordinates = {};
 var nearMeLocArr; 
-
+let polygons = [];
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -85,14 +85,70 @@ function initMap() {
 	$.ajax('https://lead.blink.jo/app.kml').done(function (xml) {
             const geojson = toGeoJSON.kml(xml);
 			console.log(geojson)
-			map.data.addGeoJson(geojson);
+		/*	map.data.addGeoJson(geojson);
             map.data.setStyle({
 			  fillColor: 0,
 			  fillOpacity: 0,
 			  strokeWeight: 0
-			});
+			}); */
+		addGeoJsonToMap(geojson)
             
 	});
+
+	function addGeoJsonToMap(geoJsonData) {
+    geoJsonData.features.forEach(function(feature) {
+        if (feature.geometry.type === 'Polygon') {
+            const coordinates = feature.geometry.coordinates[0].map(coord => {
+                return { lat: coord[1], lng: coord[0] };
+            });
+            const polygon = new google.maps.Polygon({
+                paths: coordinates,
+                fillColor: 'blue',
+			  fillOpacity: 0.2,
+			  strokeWeight: 1,
+                map: map
+            });
+
+            // Set custom properties
+            polygon.name = feature.properties.name;
+
+            // Store polygon in the array
+            polygons.push(polygon);
+
+            // Add click listener to the polygon
+            google.maps.event.addListener(polygon, 'click', function(event) {
+                placeMarker(event.latLng)
+				//checkMarkerInPolygons(event.latLng)
+            });
+
+        } else if (feature.geometry.type === 'MultiPolygon') {
+            feature.geometry.coordinates.forEach(function(polygonCoords) {
+                const paths = polygonCoords[0].map(coord => {
+                    return { lat: coord[1], lng: coord[0] };
+                });
+                const polygon = new google.maps.Polygon({
+                    paths: paths,
+                    fillColor: 'blue',
+			  fillOpacity: 0.2,
+			  strokeWeight: 1,
+                    map: map
+                });
+
+                // Set custom properties
+                polygon.name = feature.properties.name;
+
+                // Store polygon in the array
+                polygons.push(polygon);
+
+                // Add click listener to the polygon
+                google.maps.event.addListener(polygon, 'click', function(event) {
+                    placeMarker(event.latLng)
+			//checkMarkerInPolygons(event.latLng)
+                });
+            });
+        }
+    });
+}
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
@@ -130,9 +186,9 @@ function initMap() {
         placeMarker(event.latLng);
     });
 
-	map.data.addListener('click', function(event) {
+	/*   map.data.addListener('click', function(event) {
 	  placeMarker(event.latLng)
-	});
+	}); */
 
     locationButton.addEventListener('click', () => {
         if (navigator.geolocation) {
@@ -278,7 +334,7 @@ function checkMarkerInPolygons(coordinates) {
 			const id = urlParams.get('id');
 			
 
-            map.data.forEach(function (feature) {
+         /*   map.data.forEach(function (feature) {
                 const geometry = feature.getGeometry();
                 if (geometry.getType() === 'Polygon') {
                     const paths = geometry.getArray()[0].getArray();
@@ -288,7 +344,15 @@ function checkMarkerInPolygons(coordinates) {
                         polygonName = feature.getProperty('name');
                     }
                 }
-            });
+            });  */
+
+polygons.forEach((polygon) => {
+				if (google.maps.geometry.poly.containsLocation(latLng, polygon)) {
+					insidePolygon = true;
+					polygonName = polygon.name; // Accessing the name property
+				}
+			});
+	
 			var locationId;
             if (insidePolygon) {
                
