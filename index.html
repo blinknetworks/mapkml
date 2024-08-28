@@ -288,11 +288,11 @@ function updateCoordinates(id, coordinates, location_id, polygonName) {
 		    }
 						
 					
-                } else if (polygonName === 'airfiber') {
+                } else if (polygonName === 'skyfiber') {
                     if(lang == 'ar'){
-						window.location.href = `https://www.blink.jo/airfiberlead?id=${leadId}&lang=${lang}`;
+						window.location.href = `https://www.blink.jo/skyfiberlead?id=${leadId}&lang=${lang}`;
 					}else {
-			    			window.location.href = `https://www.blink.jo/airfiberlead?id=${leadId}`;
+			    			window.location.href = `https://www.blink.jo/skyfiberlead?id=${leadId}`;
 					}
                 } else if (polygonName === 'Fiber') {
                    	if(lang == 'ar'){
@@ -363,7 +363,7 @@ polygons.forEach((polygon) => {
 					
                     
                 } 
-				else if (polygonName === 'airfiber') {
+				else if (polygonName === 'skyfiber') {
 					locationId = 23;
 					updateCoordinates(id, coordinates, locationId, polygonName);
 				
